@@ -1,0 +1,1 @@
+In this project we can see from the beginning the process of creating a relational database, covering normalization, relationship play, conceptual and logical models, implementing the database in SQL Server, adding data and how to recover significant insights through development of intelligent queries.
