@@ -1,37 +1,215 @@
-Project Summary: Advanced SQL Database Development.
-A comprehensive relational database management system featuring complex queries, data manipulation, and database design for vacation tracking and market development systems. Covering normalization, relationship play, conceptual and logical models, implementation of a database in SQL Server.
-Key Technical Highlights:
+# Vacation Management System
 
-- Database Design & Architecture:
+## Project Summary
+A comprehensive SQL database system designed to manage employee vacation requests and approvals. The system features a normalized database structure, complex relationships between employees, departments, requests, and vacations, with robust data validation and business rules implementation.
 
-Normalized database design (3NF)
-Complex relationships (One-to-Many, Many-to-Many)
-Primary and Foreign key constraints
-Referential integrity implementation
-Entity-Relationship modeling
+## Key Technical Highlights
 
-- Advanced SQL Features:
+### Database Architecture
+- Fully normalized database design (3NF)
+- Complex entity relationships
+  - Employee to Department (Many-to-One)
+  - Employee to Request (One-to-Many)
+  - Request to Vacation (One-to-Many)
+  - RequestDetail as a junction table
+- Primary and Foreign key constraints
+- Referential integrity implementation
+- Comprehensive data validation rules
 
-Complex JOIN operations (INNER, LEFT OUTER)
-Subqueries and CTEs
-Date/Time manipulations
-String manipulations and concatenations
-Aggregate functions
-Window functions
-Dynamic SQL
-Data type conversions
+### Core Entities
 
-- Data Management:
+#### Employee Management
+- Unique employee identification
+- Department association
+- Employee hierarchy (Superior-Subordinate relationship)
+- Employee metadata (First Name, Last Name, Title)
+- Employee code tracking
 
-DDL (Data Definition Language)
-DML (Data Manipulation Language)
-Transaction management
-Data integrity constraints
-Bulk data operations
+#### Vacation Request Processing
+- Request lifecycle tracking
+- Approval workflow
+- Date range management
+- Total days calculation
+- Request status monitoring
 
-- Performance Optimization:
+#### Department Organization
+- Department hierarchy
+- Department code management
+- Name standardization
 
-Efficient query design
-Proper indexing strategies
-Query optimization techniques
-Performance-focused database structure
+### Advanced SQL Features
+
+#### Query Implementation
+- Complex JOIN operations
+  - INNER JOINs for related data
+  - LEFT OUTER JOINs for optional relationships
+- Subqueries for hierarchical data
+- Common Table Expressions (CTEs)
+- Window functions for analysis
+
+#### Data Operations
+- Transaction management
+- Date/Time calculations
+- Aggregate functions
+- String manipulations
+- Data validation procedures
+- Error handling
+
+### System Features
+- Automated total days calculation
+- Request status tracking
+- Approval workflow
+- Date conflict validation
+- Employee history maintenance
+- Department structure management
+
+## Database Schema
+
+### Class Diagram
+```mermaid
+classDiagram
+    class Employee {
+        +EmployeeID PK
+        +DepartmentID FK
+        +Code
+        +FirstName
+        +SecondName
+        +LastName
+        +Title
+        +Superior
+    }
+
+    class Department {
+        +DepartmentID PK
+        +Name
+    }
+
+    class Request {
+        +RequestID PK
+        +EmployeeID FK
+        +RequestDate
+        +ApprovalDate
+    }
+
+    class Vacation {
+        +VacationID PK
+        +RequestID FK
+        +StartDate
+        +EndDate
+        +TotalDays
+        +Approved
+    }
+
+    class RequestDetail {
+        +RequestID PK, FK
+        +EmployeeID PK, FK
+        +VacationID PK, FK
+    }
+
+    Employee "1" --> "1" Department : belongs to
+    Employee "1" --> "*" Request : makes
+    Request "1" --> "1" Vacation : has
+    RequestDetail "*" --> "1" Request : details
+    RequestDetail "*" --> "1" Employee : involves
+    RequestDetail "*" --> "1" Vacation : references
+
+```
+
+### Main Tables
+- Employee
+  - EmployeeID (PK)
+  - DepartmentID (FK)
+  - Code
+  - FirstName
+  - SecondName
+  - LastName
+  - Title
+  - Superior
+
+- Department
+  - DepartmentID (PK)
+  - Name
+
+- Request
+  - RequestID (PK)
+  - EmployeeID (FK)
+  - RequestDate
+  - ApprovalDate
+
+- Vacation
+  - VacationID (PK)
+  - RequestID (FK)
+  - StartDate
+  - EndDate
+  - TotalDays
+  - Approved
+
+- RequestDetail
+  - RequestID (PK, FK)
+  - EmployeeID (PK, FK)
+  - VacationID (PK, FK)
+
+## Technical Requirements
+- SQL Server 2019 or later
+- Support for advanced T-SQL features
+- Minimum 8GB RAM recommended
+- SSD storage recommended for optimal performance
+
+## Installation Steps
+1. Create new database
+2. Run schema creation scripts
+3. Execute initial data population scripts
+4. Configure user permissions
+5. Verify database connectivity
+
+## Usage Examples
+
+### Request Creation
+```sql
+INSERT INTO Request (EmployeeID, RequestDate)
+VALUES (@EmployeeID, GETDATE());
+
+INSERT INTO Vacation (RequestID, StartDate, EndDate, TotalDays)
+VALUES (@RequestID, @StartDate, @EndDate, DATEDIFF(day, @StartDate, @EndDate) + 1);
+```
+
+### Approval Process
+```sql
+UPDATE Vacation
+SET Approved = 1,
+    ApprovalDate = GETDATE()
+WHERE RequestID = @RequestID
+AND VacationID = @VacationID;
+```
+
+### Request Status Query
+```sql
+SELECT 
+    e.FirstName + ' ' + e.LastName AS EmployeeName,
+    r.RequestDate,
+    v.StartDate,
+    v.EndDate,
+    v.TotalDays,
+    v.Approved
+FROM Employee e
+JOIN Request r ON e.EmployeeID = r.EmployeeID
+JOIN Vacation v ON r.RequestID = v.RequestID
+WHERE e.DepartmentID = @DepartmentID;
+```
+
+## Performance Considerations
+- Indexed views for frequently accessed data
+- Optimized query patterns
+- Regular index maintenance
+- Statistics updates
+- Regular backup strategy
+
+## Security Implementation
+- Role-based access control
+- Data encryption
+- Audit logging
+- Secure connection requirements
+
+## License
+Copyright (c) 2024 Claudia Souza
+All rights reserved.
